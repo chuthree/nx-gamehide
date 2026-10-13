@@ -1,0 +1,61 @@
+name: Build and verify
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - 'README*.md'
+      - 'docs/**'
+      - 'assets/**'
+  pull_request:
+    paths-ignore:
+      - 'README*.md'
+      - 'docs/**'
+      - 'assets/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      BUILD_ROOT: /tmp/nx-gamehide
+    container:
+      image: devkitpro/devkita64@sha256:1fc388c3a0d34bd2045a6dadcb1020e069d5f876a187fd705de14b4440c00282
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+      - name: Install host test dependencies
+        run: apt-get update && apt-get install -y python3 git g++ make
+      - name: Cache pinned libraries
+        id: dependencies-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ env.BUILD_ROOT }}/deps
+            !${{ env.BUILD_ROOT }}/deps/Atmosphere/libraries/libstratosphere/build/**
+            !${{ env.BUILD_ROOT }}/deps/Atmosphere/libraries/libstratosphere/include/*.gch/**
+            !${{ env.BUILD_ROOT }}/deps/libnx/nx/debug/**
+            !${{ env.BUILD_ROOT }}/deps/libnx/nx/release/**
+            !${{ env.BUILD_ROOT }}/deps/libnx/nx/lib/**
+          key: ${{ runner.os }}-${{ runner.arch }}-deps-${{ hashFiles('.github/workflows/ci.yml', 'scripts/dependencies.json', 'scripts/dependencies.py', 'scripts/build.mk') }}
+      - name: Prepare pinned libraries
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          if [ "${{ steps.dependencies-cache.outputs.cache-hit }}" = "true" ]; then
+            make check-deps
+          else
+            make dependencies
+          fi
+      - name: Build, test, and package
+        run: make -j2 package HOST_CXX=g++
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: NX-GameHide-build
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14

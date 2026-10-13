@@ -1,0 +1,30 @@
+{
+  "sources": {
+    "Atmosphere": {
+      "url": "https://github.com/Atmosphere-NX/Atmosphere.git",
+      "revision": "36cc9a9f490da37dd1d5f958ee9a256be132cc1d",
+      "license": "GPL-2.0-only"
+    },
+    "libnx": {
+      "url": "https://github.com/switchbrew/libnx.git",
+      "revision": "feebd026ca0f5dcc2119f46ad8e0d16ad3dd4973",
+      "license": "ISC"
+    },
+    "libtesla": {
+      "url": "https://github.com/WerWolv/libtesla.git",
+      "revision": "f766e9b607a05e9756843cbd62b3bfb98be1646c",
+      "license": "GPL-2.0-or-later"
+    }
+  },
+  "vendored": {
+    "overlay/libtesla/include/tesla.hpp": "132f0ba423392dd6f8fe0eac7a110a560e05e2bcf3c0e47058e27447c95b8661",
+    "overlay/libtesla/include/stb_truetype.h": "78ba82c98d513304abc5149c7b92309f5ba6203b8eada77dcbad40d73df05267",
+    "overlay/libtesla/LICENSE": "189b1af95d661151e054cea10c91b3d754e4de4d3fecfb074c1fb29476f7167b",
+    "backend/linker/stratosphere.specs": "80c51c54461d66f47cf6aa04a87e44060a6408e09316ddd97dc122935a254089",
+    "backend/linker/discard-ehframe.ld": "95f760862aee14424accbd76769b3c2dce7c99e43aa7c4601b269904fbe22262"
+  },
+  "newlib_notice": {
+    "url": "https://raw.githubusercontent.com/devkitPro/newlib/b14e2e7d15a8f4ef4829d797692b42541c61e0ed/COPYING.NEWLIB",
+    "sha256": "f3afe48e4bc6ed8466a42e9dacb6be1d8f9cbf5aac15cb8e474a5ccde8b40ef6"
+  }
+}
