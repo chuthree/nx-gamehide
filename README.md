@@ -7,7 +7,7 @@ English | [简体中文](README.zh-CN.md)
 Hide and restore games in the Nintendo Switch HOME menu through Tesla.<br>
 Games and saves are kept.
 
-[Installation](#installation) · [Usage](#usage) · [Hiding scope](#hiding-scope) · [Uninstallation](#uninstallation) · [Docs and feedback](#docs-and-feedback)
+[Installation](#installation) · [Usage](#usage) · [Hiding scope](#hiding-scope) · [How it works](#how-it-works) · [Uninstallation](#uninstallation) · [Docs and feedback](#docs-and-feedback)
 
 </div>
 
@@ -47,6 +47,33 @@ The following results were verified on a console. Games remain hidden after a fu
 | Other launchers | Not tested |
 
 If you open Groups while a game is hidden, you must manually add it back to its groups after showing it again. Its group membership is preserved if you do not open Groups while it is hidden.
+
+## How it works
+
+NX-GameHide uses Atmosphère's MITM mechanism to intercept HOME (qlaunch) queries to the system service `ns:am2`. The backend filters the returned game records using the hidden list.
+
+```text
+┌────────────────────────────┐                ┌────────────────────────────┐
+│Tesla / GameHide            │───── save ────▶│Hidden list                 │
+│Select B to hide            │                │hidden_games.txt: B         │
+└─────────────┬──────────────┘                └─────────────┬──────────────┘
+              │ request reload                              │ read list
+              │         ┌───────────────────────────────────┘
+              ▼         ▼
+┌────────────────────────────┐                ┌────────────────────────────┐
+│NX-GameHide backend         │─── A, C ──────▶│HOME / qlaunch              │
+│Filter out B                │─── refresh ───▶│Show A, C                   │
+└─────────────┬──────────────┘                └────────────────────────────┘
+              ▲
+              │ Raw records: A, B, C
+              │
+┌─────────────┴──────────────┐
+│System service              │
+│ns:am2                      │
+└────────────────────────────┘
+```
+
+Tesla saves the selected game IDs to `config/nx-gamehide/hidden_games.txt`, then asks the backend to reload the list and notify HOME to refresh. Showing a game removes its ID from the list. Game files and saves remain untouched; only queries from HOME are intercepted.
 
 ## Uninstallation
 
